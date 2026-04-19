@@ -191,15 +191,26 @@ function parseMessage(text) {
 
 async function callAI(systemPrompt, messages) {
   try {
-    const res = await fetch("/api/chat", {
+    // Use the API proxy - either local dev server or Vercel production
+    const apiUrl = import.meta.env.DEV ? 'http://localhost:3001/api/chat' : '/api/chat';
+    
+    const res = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ systemPrompt, messages }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "API request failed");
+    
+    if (!res.ok) {
+      console.error("API Error:", data);
+      throw new Error(data.error || "API request failed");
+    }
+    
     return data.content || "Let's try again! 🌸";
-  } catch { return "Oops! Something went wrong. Let's try again! 🌸"; }
+  } catch (error) {
+    console.error("AI call error:", error.message, error);
+    return "Oops! Something went wrong. Let's try again! 🌸";
+  }
 }
 
 /* ───────────────────── COMPONENTS ───────────────────── */
