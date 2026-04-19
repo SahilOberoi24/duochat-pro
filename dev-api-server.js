@@ -6,6 +6,8 @@ config({ path: '.env.local' })
 const apiKey = process.env.VITE_ANTHROPIC_API_KEY
 
 console.log('API Key available:', !!apiKey)
+console.log('API Key starts with:', apiKey?.substring(0, 20) + '...')
+console.log('API Key length:', apiKey?.length)
 
 const server = http.createServer(async (req, res) => {
   // Set CORS headers to allow requests from Vite dev server
@@ -36,13 +38,15 @@ const server = http.createServer(async (req, res) => {
           return
         }
 
-        console.log('Calling Anthropic API...')
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        console.log('Calling OpenRouter API...')
+        console.log('Using API key:', apiKey.substring(0, 20) + '...')
+        const response = await fetch('https://openrouter.ai/api/v1/messages', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01'
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': 'http://localhost:5173',
+            'X-Title': 'DuoChat Pro'
           },
           body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
